@@ -22,12 +22,7 @@ const { isadmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)),
-});
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/login", login);
 router.delete("/logout", logout);

@@ -22,6 +22,7 @@ function AdminLogin() {
       );
 
       if (res.data.message === "Admin Logged In") {
+        localStorage.setItem("adminUser", JSON.stringify(res.data.admin));
         // Update AuthContext state for admin
         login({
           name: res.data.admin.name || res.data.admin.email,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../api/axios';
+import axios, { getImageUrl } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
@@ -103,9 +103,7 @@ const Cart = () => {
               <div className="col-span-full md:col-span-5 flex items-center space-x-4">
                 <img
                   alt={item.name}
-                  src={item.productId && item.productId.image
-                    ? `http://localhost:3000${item.productId.image}`
-                    : 'https://via.placeholder.com/80'}
+                  src={getImageUrl(item.productId?.image)}
                   className="w-20 h-20 object-cover rounded"
                 />
                 <div>

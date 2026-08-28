@@ -1,12 +1,13 @@
 
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const connectDB = async () =>{
+const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb+srv://linas:123@cluster1.sa4jwmi.mongodb.net/')
-        console.log('DB connected');
+        const connStr = process.env.MONGO_URI || 'mongodb+srv://linas:123@cluster0.gumob.mongodb.net/tov?retryWrites=true&w=majority';
+        await mongoose.connect(connStr);
+        console.log('DB connected successfully');
     } catch (error) {
-        console.log(error);
+        console.error('Database connection error:', error);
     }
 }
-module.exports = connectDB
+module.exports = connectDB;

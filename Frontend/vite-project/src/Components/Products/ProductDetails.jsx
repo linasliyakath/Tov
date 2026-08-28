@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "../../api/axios";
+import axios, { getImageUrl } from "../../api/axios";
 import Swal from "sweetalert2";
 
 function ProductDetails() {
@@ -95,7 +95,7 @@ function ProductDetails() {
         {/* Left Side: Product Image */}
         <div className="md:w-1/2 flex items-center justify-center">
           <img
-            src={`http://localhost:3000${product.image}`}
+            src={getImageUrl(product.image)}
             alt={product.name}
             className="w-full h-auto object-contain rounded"
           />

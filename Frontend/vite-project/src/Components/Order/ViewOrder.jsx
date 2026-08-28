@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import axios, { getImageUrl } from "../../api/axios";
 import Swal from 'sweetalert2';
 import { useNavigate } from "react-router-dom";   // ✅ ADDED
 
@@ -135,11 +135,7 @@ const ViewOrder = () => {
                   className="flex gap-4 items-center p-4 border rounded-lg shadow-sm mb-4 bg-gray-50"
                 >
                   <img
-                    src={
-                      item.product && item.product.image
-                        ? `http://localhost:3000${item.product.image}`
-                        : "https://via.placeholder.com/80?text=No+Image"
-                    }
+                    src={getImageUrl(item.product?.image)}
                     alt={item.name}
                     className="w-16 h-16 rounded-lg object-cover"
                   />

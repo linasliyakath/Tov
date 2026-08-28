@@ -3,12 +3,19 @@ const Cart = require('../models/cartModel');
 const User = require('../models/userModel');
 const Product = require('../models/productModel');
 
+const getUserId = (req) => {
+    return (req.session && req.session.user && req.session.user.id) || req.headers['x-user-id'];
+};
 
 // Create order and reduce stock
 exports.createOrder = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId = getUserId(req);
     const { name, address, phone } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
 
     const findUser = await User.findById(userId);
     if (!findUser) {
@@ -82,7 +89,10 @@ exports.createOrder = async (req, res) => {
 // get orders
 exports.getOrders = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
     const orders = await Order.find({ user: userId }).populate({
       path : "items.product",
       select:"name image"
@@ -96,7 +106,10 @@ exports.getOrders = async (req, res) => {
 
 exports.getOrderById = async(req,res)=>{
     try {
-        const userId = req.session.user.id
+        const userId = getUserId(req);
+        if (!userId) {
+          return res.status(401).json({ message: "User not logged in" });
+        }
         const order = await Order.findOne({_id:req.params.id, user: userId}).populate('items.product')
 
         if(!order) return res.json({message:"Order NOt Found"})

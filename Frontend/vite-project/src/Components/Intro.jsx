@@ -5,12 +5,12 @@ import { Link } from "react-router-dom";
 
 function Head() {
   const products = [
-    { id: "69257aec2bf86d55967118ed", image: "/assets/@niklinio.jpeg", alt: "Product 1", gridClass: "col-span-6 md:row-span-12", overlayText: "NEW ARRIVAL" },
-    { id: "69259105ee33c75e40e7f03e", image: "/assets/download (15).jpeg", alt: "Product 2", gridClass: "col-span-6 md:row-span-13 md:col-start-7", overlayText: "SHOP NOW" },
-    { id: "692591ccee33c75e40e7f05e", image: "/assets/download (16).jpeg", alt: "Product 3", gridClass: "col-span-6 md:row-span-7 md:row-start-13", overlayText: "TRENDING" },
-    { id: "69259159ee33c75e40e7f056", image: "/assets/download (14).jpeg", alt: "Product 4", gridClass: "col-span-6 md:row-span-12 md:col-start-7 md:row-start-14", overlayText: "MUST HAVE" },
-    { id: "6925918fee33c75e40e7f05a", image: "/assets/by basechkaa.jpeg", alt: "Product 5", gridClass: "col-span-6 md:row-span-9 md:row-start-20", overlayText: "STYLE" },
-    { id: "6", image: "/assets/Group 25.jpg", alt: "Product 6", gridClass: "col-span-6 md:col-start-7 md:row-span-3 md:row-start-26", overlayText: "" }, 
+    { id: "6a91ed8710a9dddaac37eb4f", image: "https://res.cloudinary.com/jgrhqydf/image/upload/v1787948423/tov_products/i6ghyl9zxnmn7gou9vl2.jpg", alt: "Urban Leather Biker Jacket", gridClass: "col-span-1 md:col-span-6 md:row-span-12", overlayText: "NEW ARRIVAL" },
+    { id: "6a91f1b7fe3f6592bd2ce282", image: "https://res.cloudinary.com/jgrhqydf/image/upload/v1787949483/tov_products/ay8hykp17gcujjliq5um.jpg", alt: "Classic Italian Suit & Monk-Strap Shoes", gridClass: "col-span-1 md:col-span-6 md:row-span-13 md:col-start-7", overlayText: "SHOP NOW" },
+    { id: "6a91ed8a10a9dddaac37eb53", image: "https://res.cloudinary.com/jgrhqydf/image/upload/v1787948425/tov_products/gik40wru4jsfzarnslot.jpg", alt: "Classy Oxford Leather Shoes", gridClass: "col-span-1 md:col-span-6 md:row-span-7 md:row-start-13", overlayText: "TRENDING" },
+    { id: "6a91ed8b10a9dddaac37eb55", image: "https://res.cloudinary.com/jgrhqydf/image/upload/v1787948427/tov_products/l1gnzjq6uwiiier5sjwg.jpg", alt: "Rust Overcoat Trench", gridClass: "col-span-1 md:col-span-6 md:row-span-12 md:col-start-7 md:row-start-14", overlayText: "MUST HAVE" },
+    { id: "6a91ed8d10a9dddaac37eb57", image: "https://res.cloudinary.com/jgrhqydf/image/upload/v1787948428/tov_products/hj6cjlea1gmgk0v2dwed.jpg", alt: "Black Shearling Turtle-Neck Coat", gridClass: "col-span-1 md:col-span-6 md:row-span-9 md:row-start-20", overlayText: "STYLE" },
+    { id: "6", image: "/assets/Group 25.jpg", alt: "TOV Branding", gridClass: "col-span-1 md:col-span-6 md:col-start-7 md:row-span-3 md:row-start-26", overlayText: "" }, 
   ];
 
   const [isVisible, setIsVisible] = useState({});
@@ -145,6 +145,7 @@ function Head() {
     bg-white
     flex items-center justify-center
     relative
+    ${product.id !== "6" ? "min-h-[400px] md:min-h-0" : "w-full h-auto"}
   `}
 >
   {/* Product Content (Image/Link) */}
@@ -156,19 +157,19 @@ function Head() {
       <img
         src={product.image}
         alt={product.alt}
-        className="w-full h-full object-cover"
+        className="w-full h-full min-h-[400px] md:min-h-0 object-cover"
       />
     </Link>
   ) : (
     <img
       src={product.image}
       alt={product.alt}
-      className="w-full h-full object-cover"
+      className="w-full h-auto object-cover block"
     />
   )}
 
   {/* Overlay */}
-  {product.id !== "6" && (
+  {product.id !== "6" && product.overlayText && (
     <div
       className={`
         absolute inset-0
@@ -180,7 +181,7 @@ function Head() {
       `}
     >
       <Link
-        to="/userDashboard"
+        to={`/product/${product.id}`}
         className="pointer-events-auto cursor-pointer flex flex-col items-center"
       >
         <p

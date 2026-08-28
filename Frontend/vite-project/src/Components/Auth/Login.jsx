@@ -24,10 +24,14 @@ function Login() {
 if (res.data.message === "User Logged In") {
 
   login({
+    id: res.data.id,
     name: res.data.name,
     role: res.data.role,
   });
 
+  if (res.data.id) {
+    localStorage.setItem("userId", res.data.id);
+  }
   localStorage.setItem("role", res.data.role);
   localStorage.setItem("name", res.data.name);
   localStorage.setItem("auth", "true");   

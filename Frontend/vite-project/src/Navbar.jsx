@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-import axios from "./api/axios";
+import axios, { API_BASE_URL, getImageUrl } from "./api/axios";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -65,8 +65,19 @@ const Navbar = () => {
       navigate("/");
       localStorage.removeItem("name");
       localStorage.removeItem("role");
+      localStorage.removeItem("auth");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("adminUser");
     } catch (error) {
       console.log(error);
+      // Still logout locally even if backend fails
+      logout();
+      navigate("/");
+      localStorage.removeItem("name");
+      localStorage.removeItem("role");
+      localStorage.removeItem("auth");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("adminUser");
     }
   };
 
@@ -139,7 +150,7 @@ items-center justify-between px-5 font-grotesk bg-white z-999 shadow-md"
                         className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-b-0 flex items-center gap-3"
                       >
                         <img
-                          src={`http://localhost:3000${product.image}`}
+                          src={getImageUrl(product.image)}
                           alt={product.name}
                           className="w-10 h-10 object-cover rounded"
                         />

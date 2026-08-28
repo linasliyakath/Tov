@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../api/axios";
 import { Navigate } from "react-router-dom";
-
-axios.defaults.withCredentials = true;
 
 export default function PrivateRoute({ children }) {
   const [auth, setAuth] = useState(null);
 
   useEffect(() => {
+    const isAuth = localStorage.getItem("auth") === "true";
+    if (isAuth) {
+      setAuth(true);
+      return;
+    }
+
     axios
       .get("/checkAuth", { withCredentials: true })
       .then((res) => setAuth(res.data.authenticated))

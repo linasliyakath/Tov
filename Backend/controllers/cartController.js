@@ -1,10 +1,14 @@
 const Cart = require('../models/cartModel')
 const Product = require('../models/productModel')
 
+const getUserId = (req) => {
+    return (req.session && req.session.user && req.session.user.id) || req.headers['x-user-id'];
+};
+
 // Get Cart Items
 exports.getCart = async (req,res)=>{
     try {
-       const userId = req.session.user.id
+       const userId = getUserId(req);
        
        if(!userId){
         return res.status(404).json({message : "User not Logged in"})
@@ -20,8 +24,12 @@ exports.getCart = async (req,res)=>{
 // add items to cart
 exports.addToCart = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId = getUserId(req);
     const { productId, quantity, name, size } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
 
     if (!size) {
       return res.status(400).json({ message: "Size is required" });
@@ -64,8 +72,12 @@ exports.addToCart = async (req, res) => {
 // Update Cart Items
 exports.updateCartItems = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId = getUserId(req);
     const { productId, size, quantity } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
 
     if (!size) {
       return res.status(400).json({ message: "Size is required" });
@@ -97,8 +109,12 @@ exports.updateCartItems = async (req, res) => {
 // remove items from cart 
 exports.removeItems = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId = getUserId(req);
     const { productId, size } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
 
     if (!size) {
       return res.status(400).json({ message: "Size is required" });

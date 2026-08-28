@@ -40,7 +40,8 @@ exports.login = async (req, res) => {
     req.session.cart = [];
     res.json({ message: "User Logged In",
       role : "user",
-      name : user.name
+      name : user.name,
+      id: user._id || user.id
      });
   } catch (error) {
     console.error("User Login Error:", error);

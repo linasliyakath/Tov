@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
@@ -16,10 +17,23 @@ PORT = 3000;
 const app = express();
 connectDB();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Role", "X-User-Id"],
   })
 );
 
@@ -58,6 +72,10 @@ app.get("/check-session", (req, res) => {
   res.json({ loggedInAs: "none" });
 });
 
-app.listen(PORT, () =>
-  console.log(`Server Running on http://localhost:${PORT}`)
-);
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () =>
+    console.log(`Server Running on http://localhost:${PORT}`)
+  );
+}
+
+module.exports = app;

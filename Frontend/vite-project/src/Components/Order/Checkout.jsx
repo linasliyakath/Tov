@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../api/axios';
+import axios, { getImageUrl } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -161,9 +161,7 @@ const Checkout = () => {
                   {cart.items.map(item => (
                     <div key={item._id} className="flex items-start gap-4 pb-4 border-b last:border-b-0">
                       <img
-                        src={item.productId && item.productId.image
-                          ? `http://localhost:3000${item.productId.image}`
-                          : "https://via.placeholder.com/64"}
+                        src={getImageUrl(item.productId?.image)}
                         alt={item.name}
                         className="w-20 h-28 object-cover rounded"
                       />

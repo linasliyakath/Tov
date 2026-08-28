@@ -3,6 +3,7 @@ const User = require('../models/userModel');
 const Product = require('../models/productModel')
 const Category = require('../models/categoryModel')
 const Order = require('../models/orderModel')
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 
 exports.login = async (req, res) => {
@@ -90,7 +91,11 @@ exports.addProducts = async (req, res) => {
         return res.status(400).json({ message: "Invalid stock format" });
       }
     }
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    let imagePath = null;
+    if (req.file) {
+      const uploadRes = await uploadToCloudinary(req.file.buffer);
+      imagePath = uploadRes.secure_url;
+    }
 
     const newProduct = new Product({
       name,
@@ -182,7 +187,11 @@ exports.updateProduct = async (req, res) => {
         return res.status(400).json({ message: "Invalid stock format" });
       }
     }
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    let imagePath = null;
+    if (req.file) {
+      const uploadRes = await uploadToCloudinary(req.file.buffer);
+      imagePath = uploadRes.secure_url;
+    }
 
     const updateData = { name, description, price, category, stock };
 

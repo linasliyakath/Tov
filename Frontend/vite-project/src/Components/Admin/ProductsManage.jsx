@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import axios, { getImageUrl } from "../../api/axios";
 import Swal from "sweetalert2";
 
 const Products = () => {
@@ -480,7 +480,7 @@ const getAllProducts = async () => {
                 <tr key={p._id}>
                   <td className="px-2 sm:px-4 py-2 sm:py-3">
                     <img
-                      src={`http://localhost:3000${p.image}`}
+                      src={getImageUrl(p.image)}
                       alt={p.name}
                       className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded"
                     />

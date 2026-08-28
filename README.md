@@ -89,7 +89,7 @@ Deployment	AWS EC2, PM2, NGINX
 
 🌐 Live Demo
 
-🔗 https://tovfashion.duckdns.org/
+🔗 https://tov-rho.vercel.app/
 
 👤 Author
 

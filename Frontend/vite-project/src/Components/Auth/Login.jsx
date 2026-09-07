@@ -29,13 +29,6 @@ if (res.data.message === "User Logged In") {
     role: res.data.role,
   });
 
-  if (res.data.id) {
-    localStorage.setItem("userId", res.data.id);
-  }
-  localStorage.setItem("role", res.data.role);
-  localStorage.setItem("name", res.data.name);
-  localStorage.setItem("auth", "true");   
-
   navigate("/userDashboard");
 }
  else {

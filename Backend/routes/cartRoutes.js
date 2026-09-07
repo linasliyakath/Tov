@@ -8,6 +8,6 @@ const {isAutheticated} = require('../middleware/authMiddleware')
 router.post('/add',isAutheticated,addToCart)
 router.get('/getCart',isAutheticated,getCart)
 router.put('/updateCart',isAutheticated,updateCartItems)
-router.delete('/remove',removeItems)
+router.delete('/remove',isAutheticated,removeItems)
 
 module.exports = router

@@ -15,16 +15,4 @@ const api = axios.create({
     withCredentials: true
 });
 
-api.interceptors.request.use((config) => {
-    const adminUser = localStorage.getItem("adminUser");
-    if (adminUser) {
-        config.headers['X-Admin-Role'] = 'admin';
-    }
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-        config.headers['X-User-Id'] = userId;
-    }
-    return config;
-});
-
 export default api;

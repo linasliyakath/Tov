@@ -6,15 +6,27 @@ import Swal from "sweetalert2";
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
+    setProduct(null);
+    setError("");
     axios
       .get(`/product/getProductById/${id}`)
-      .then((response) => setProduct(response.data))
-      .catch((error) => console.error("Error fetching product:", error));
+      .then((response) => {
+        if (!response.data?._id) {
+          setError(response.data?.message || "Product not found.");
+          return;
+        }
+        setProduct(response.data);
+      })
+      .catch((requestError) => {
+        console.error("Error fetching product:", requestError);
+        setError("Could not load this product. Please try again.");
+      });
   }, [id]);
 
   // Get available stock for selected size
@@ -63,6 +75,9 @@ function ProductDetails() {
       navigate('/login')
     }
   };
+
+  if (error)
+    return <div className="text-center py-20 text-red-600">{error}</div>;
 
   if (!product)
     return <div className="text-center py-20 text-gray-500">Loading...</div>;

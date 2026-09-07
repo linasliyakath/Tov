@@ -60,24 +60,16 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.delete("/admin/logout", { withCredentials: true });
+      await axios.delete(role === "admin" ? "/admin/logout" : "/logout", {
+        withCredentials: true,
+      });
       logout();
       navigate("/");
-      localStorage.removeItem("name");
-      localStorage.removeItem("role");
-      localStorage.removeItem("auth");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("adminUser");
     } catch (error) {
       console.log(error);
       // Still logout locally even if backend fails
       logout();
       navigate("/");
-      localStorage.removeItem("name");
-      localStorage.removeItem("role");
-      localStorage.removeItem("auth");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("adminUser");
     }
   };
 

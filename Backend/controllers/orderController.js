@@ -4,7 +4,7 @@ const User = require('../models/userModel');
 const Product = require('../models/productModel');
 
 const getUserId = (req) => {
-    return (req.session && req.session.user && req.session.user.id) || req.headers['x-user-id'];
+    return req.session && req.session.user && req.session.user.id;
 };
 
 // Create order and reduce stock

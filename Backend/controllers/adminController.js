@@ -31,13 +31,19 @@ exports.login = async (req, res) => {
       name : admin.name,
     };
 
-    return res.status(200).json({
-      message: "Admin Logged In",
-      admin: {
-        id: admin._id,
-        email: admin.email,
-        name: admin.name
+    return req.session.save((sessionError) => {
+      if (sessionError) {
+        console.error("Admin session save error:", sessionError);
+        return res.status(500).json({ message: "Could not start admin session" });
       }
+      return res.status(200).json({
+        message: "Admin Logged In",
+        admin: {
+          id: admin._id,
+          email: admin.email,
+          name: admin.name,
+        },
+      });
     });
 
   } catch (error) {
@@ -54,7 +60,12 @@ exports.logout = (req, res) => {
         console.error("Session destroy error:", err);
         return res.status(500).json({ message: "Logout failed" });
       }
-      res.clearCookie("connect.sid", { path: "/", httpOnly: true, sameSite: "lax" });
+      res.clearCookie("tov.sid", {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
       res.json({ message: "Logged Out Successfully" });
     });
   } else {

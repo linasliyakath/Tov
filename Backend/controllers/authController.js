@@ -5,16 +5,21 @@ const User = require("../models/userModel");
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
   try {
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Name, email, and password are required" });
+    }
+
     const userExists = await User.findOne({ email });
-    if (userExists) return res.json({ message: "User Already Exists" });
+    if (userExists) return res.status(409).json({ message: "An account already exists for this email" });
 
     const hashedPass = await bcrypt.hash(password, 10);
     const newUser = new User({ name, email, password: hashedPass });
     await newUser.save();
 
-    res.json({ message: "User Registered" });
+    return res.status(201).json({ message: "User Registered" });
   } catch (error) {
-    console.log("Error", error);
+    console.error("Registration error:", error);
+    return res.status(500).json({ message: "Could not register your account" });
   }
 };
 
@@ -36,13 +41,20 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.json({ message: "Invalid credentials" });
 
-    req.session.user = { id: user.id, name: user.name ,role: "user" };
+    req.session.user = { id: user.id, name: user.name, role: "user" };
     req.session.cart = [];
-    res.json({ message: "User Logged In",
-      role : "user",
-      name : user.name,
-      id: user._id || user.id
-     });
+    return req.session.save((sessionError) => {
+      if (sessionError) {
+        console.error("Session save error:", sessionError);
+        return res.status(500).json({ message: "Could not start your session" });
+      }
+      return res.json({
+        message: "User Logged In",
+        role: "user",
+        name: user.name,
+        id: user._id || user.id,
+      });
+    });
   } catch (error) {
     console.error("User Login Error:", error);
     res.status(500).json({ message: "Server Error" });
@@ -57,7 +69,12 @@ exports.logout = (req, res) => {
         console.error("Session destroy error:", err);
         return res.status(500).json({ message: "Logout failed" });
       }
-      res.clearCookie("connect.sid", { path: "/", httpOnly: true, sameSite: "lax" });
+      res.clearCookie("tov.sid", {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
       res.json({ message: "Logged Out Successfully" });
     });
   } else {

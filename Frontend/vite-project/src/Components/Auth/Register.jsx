@@ -26,8 +26,8 @@ function Register() {
           alert(res.data.message)
        }
      } catch (error) {
-      console.log(error,'register component Failed');
-      
+      alert(error.response?.data?.message || "Registration failed. Please try again.");
+      console.error(error, 'register component failed');
      }
     }
   return (

@@ -2,7 +2,7 @@ const Cart = require('../models/cartModel')
 const Product = require('../models/productModel')
 
 const getUserId = (req) => {
-    return (req.session && req.session.user && req.session.user.id) || req.headers['x-user-id'];
+    return req.session && req.session.user && req.session.user.id;
 };
 
 // Get Cart Items
@@ -133,5 +133,4 @@ exports.removeItems = async (req, res) => {
     res.json({ message: "Cart removing error" });
   }
 };
-
 

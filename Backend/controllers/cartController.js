@@ -1,8 +1,17 @@
 const Cart = require('../models/cartModel')
 const Product = require('../models/productModel')
+const { getUserIdFromAuth } = require('../utils/authToken')
 
 const getUserId = (req) => {
-    return req.session && req.session.user && req.session.user.id;
+    return getUserIdFromAuth(req.auth) || getUserIdFromAuth(req.session?.user);
+};
+
+const getStockForSize = (product, size) => {
+    if (!product?.stock) return 0;
+    if (typeof product.stock.get === 'function') {
+        return product.stock.get(size) || 0;
+    }
+    return product.stock[size] || 0;
 };
 
 // Get Cart Items
@@ -38,7 +47,7 @@ exports.addToCart = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const availableStock = product.stock.get(size) || 0;
+    const availableStock = getStockForSize(product, size);
     if (quantity > availableStock) {
       return res.status(400).json({ message: `Only ${availableStock} items available in size ${size}` });
     }
@@ -86,7 +95,7 @@ exports.updateCartItems = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const availableStock = product.stock.get(size) || 0;
+    const availableStock = getStockForSize(product, size);
     if (quantity > availableStock) {
       return res.status(400).json({ message: `Only ${availableStock} items available in size ${size}` });
     }
@@ -133,4 +142,3 @@ exports.removeItems = async (req, res) => {
     res.json({ message: "Cart removing error" });
   }
 };
-

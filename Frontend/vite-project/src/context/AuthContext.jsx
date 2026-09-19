@@ -3,55 +3,71 @@ import axios from "../api/axios";
 
 export const AuthContext = createContext();
 
+const readStoredUser = () => {
+  try {
+    const storedUser = localStorage.getItem("authUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);  // <-- STORE USER HERE
+  const storedUser = readStoredUser();
+  const hasToken = Boolean(localStorage.getItem("authToken"));
+  const [isAuthenticated, setIsAuthenticated] = useState(hasToken && Boolean(storedUser));
+  const [user, setUser] = useState(storedUser);
   const [loading, setLoading] = useState(true);
 
-  // Check auth status on refresh
   useEffect(() => {
-    const checkAuth = async () => {
+    const verifyAuth = async () => {
+      const token = localStorage.getItem("authToken");
+
       try {
-        const res = await axios.get("/checkAuth", {
-          withCredentials: true,
-        });
+        const res = await axios.get("/checkAuth", { withCredentials: true });
 
         if (res.data.authenticated) {
-          setIsAuthenticated(true);
-          setUser({
+          const nextUser = {
+            id: res.data.id,
             name: res.data.name,
             role: res.data.role,
-          });
-        } else {
+          };
+          setIsAuthenticated(true);
+          setUser(nextUser);
+          localStorage.setItem("authUser", JSON.stringify(nextUser));
+        } else if (!token) {
+          setIsAuthenticated(false);
+          setUser(null);
+          localStorage.removeItem("authUser");
+        }
+      } catch {
+        if (!token) {
           setIsAuthenticated(false);
           setUser(null);
         }
-      } catch {
-        setIsAuthenticated(false);
-        setUser(null);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    checkAuth();
+    verifyAuth();
   }, []);
 
-  // Called after successful login
   const login = (userData) => {
     setIsAuthenticated(true);
-    setUser(userData);  // store name + role
+    setUser(userData);
+    localStorage.setItem("authUser", JSON.stringify(userData));
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    localStorage.removeItem("authUser");
+    localStorage.removeItem("authToken");
   };
 
-  if (loading) return <div>Loading...</div>;
-
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

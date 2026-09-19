@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios, { API_BASE_URL, getImageUrl } from "../../api/axios";
+import axios, { getImageUrl } from "../../api/axios";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import ProductGridSkeleton from "../Skeletons/ProductGridSkeleton";
 
 const ProductCard = () => {
-  const { categoryId = "all" } = useParams(); // Get category from route param, default to "all"
+  const { categoryId = "all" } = useParams();
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -11,6 +12,7 @@ const ProductCard = () => {
   const [selectedCategory, setSelectedCategory] = useState(categoryId);
   const [sortOrder, setSortOrder] = useState("none");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const itemsPerPage = 8;
 
@@ -30,17 +32,17 @@ const ProductCard = () => {
 
   // Fetch products whenever selectedCategory changes
   useEffect(() => {
-    if (selectedCategory === "all") {
-      axios
-        .get("/product/getAllProducts")
-        .then((res) => setProducts(res.data))
-        .catch((error) => console.log(error));
-    } else {
-      axios
-        .get(`/product/productsByCategory/${selectedCategory}`)
-        .then((res) => setProducts(res.data))
-        .catch((error) => console.log(error));
-    }
+    setLoading(true);
+    const url =
+      selectedCategory === "all"
+        ? "/product/getAllProducts"
+        : `/product/productsByCategory/${selectedCategory}`;
+
+    axios
+      .get(url)
+      .then((res) => setProducts(res.data))
+      .catch((error) => console.log(error))
+      .finally(() => setLoading(false));
   }, [selectedCategory]);
 
   // Sort products
@@ -50,14 +52,13 @@ const ProductCard = () => {
     return 0;
   });
 
-  // Calculate pagination
+  // Pagination
   const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
   const displayedProducts = sortedProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Handle category button click
   const handleCategoryClick = (id) => {
     if (id === "all") {
       navigate("/userDashboard");
@@ -68,11 +69,9 @@ const ProductCard = () => {
 
   return (
     <section className="min-h-screen bg-gray-100 py-8 pt-16">
-      {/* Added pt-16 to push content below fixed navbar */}
       <div className="max-w-7xl mx-auto px-4">
-        {/* Categories Section */}
+        {/* Categories + Sort bar */}
         <div className="flex flex-col md:flex-row gap-2 md:gap-4 pb-4 mb-6">
-          {/* Categories */}
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleCategoryClick("all")}
@@ -91,7 +90,6 @@ const ProductCard = () => {
             ))}
           </div>
 
-          {/* Sort Dropdown */}
           <div className="w-fit md:w-auto flex mt-2 md:mt-0 md:ml-auto">
             <select
               value={sortOrder}
@@ -108,23 +106,23 @@ const ProductCard = () => {
           </div>
         </div>
 
-        {/* Products Section */}
-        {sortedProducts.length === 0 ? (
+        {/* Products — skeleton while loading */}
+        {loading ? (
+          <ProductGridSkeleton />
+        ) : sortedProducts.length === 0 ? (
           <p className="text-gray-500">No products found</p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {displayedProducts.map((p) => (
+              {displayedProducts.map((p, index) => (
                 <Link key={p._id} to={`/product/${p._id}`} className="block">
-                  <div
-                    className="relative bg-white overflow-hidden shadow-sm flex flex-col 
-  cursor-pointer justify-between h-full
-  transition-transform duration-300 hover:scale-105 hover:z-30"
-                  >
+                  <div className="relative bg-white overflow-hidden shadow-sm flex flex-col cursor-pointer justify-between h-full transition-transform duration-300 hover:scale-105 hover:z-30">
                     <img
                       src={getImageUrl(p.image)}
                       alt={p.name}
                       className="w-full h-96 object-cover"
+                      loading={index < 4 ? "eager" : "lazy"}
+                      decoding="async"
                     />
                     <div className="px-6 py-4 flex flex-col grow">
                       <h3 className="text-sm font-normal text-gray-800 mb-2">
@@ -144,7 +142,7 @@ const ProductCard = () => {
               ))}
             </div>
 
-            {/* Pagination Controls */}
+            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-12 mb-6">
                 <button

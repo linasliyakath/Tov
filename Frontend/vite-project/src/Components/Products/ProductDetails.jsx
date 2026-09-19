@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios, { getImageUrl } from "../../api/axios";
 import Swal from "sweetalert2";
+import { AuthContext } from "../../context/AuthContext";
+import ProductDetailSkeleton from "../Skeletons/ProductDetailSkeleton";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -10,6 +12,8 @@ function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, user, loading } = useContext(AuthContext);
 
   useEffect(() => {
     setProduct(null);
@@ -41,8 +45,14 @@ function ProductDetails() {
   }, [availableStock, quantity]);
 
   const addToCart = async () => {
-
     if (!size) return;
+
+    if (loading) return; // wait for auth check to finish
+
+    if (!isAuthenticated || user?.role === "admin") {
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
 
     if (quantity > availableStock) {
       Swal.fire({
@@ -54,15 +64,12 @@ function ProductDetails() {
     }
 
     try {
-      await axios.post(
-        "/cart/add",
-        {
-          productId: product._id,
-          name: product.name,
-          quantity,
-          size,
-        }
-      );
+      await axios.post("/cart/add", {
+        productId: product._id,
+        name: product.name,
+        quantity,
+        size,
+      });
       Swal.fire({
         icon: "success",
         title: "Added!",
@@ -72,15 +79,27 @@ function ProductDetails() {
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
-      navigate('/login')
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message || "Could not add this item to your cart.";
+
+      if (status === 401) {
+        navigate("/login");
+        return;
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Could not add to cart",
+        text: message,
+      });
     }
   };
 
   if (error)
     return <div className="text-center py-20 text-red-600">{error}</div>;
 
-  if (!product)
-    return <div className="text-center py-20 text-gray-500">Loading...</div>;
+  if (!product) return <ProductDetailSkeleton />;
 
   return (
     <section className="min-h-screen bg-gray-100 py-8">
@@ -113,6 +132,8 @@ function ProductDetails() {
             src={getImageUrl(product.image)}
             alt={product.name}
             className="w-full h-auto object-contain rounded"
+            loading="eager"
+            decoding="async"
           />
         </div>
 

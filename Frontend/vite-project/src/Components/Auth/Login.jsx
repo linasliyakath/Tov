@@ -1,12 +1,14 @@
 import React, { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "../../api/axios";
 import { AuthContext } from "../../context/AuthContext";
 axios.defaults.withCredentials = true;
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useContext(AuthContext);
+  const redirectTo = new URLSearchParams(location.search).get("redirect") || "/userDashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,18 +23,16 @@ function Login() {
         { withCredentials: true }
       );
 
-if (res.data.message === "User Logged In") {
-
-  login({
-    id: res.data.id,
-    name: res.data.name,
-    role: res.data.role,
-  });
-
-  navigate("/userDashboard");
-}
- else {
-        alert(res.data.message);
+      if (res.data.message === "User Logged In" && res.data.token) {
+        localStorage.setItem("authToken", res.data.token);
+        login({
+          id: res.data.id,
+          name: res.data.name,
+          role: res.data.role,
+        });
+        navigate(redirectTo);
+      } else {
+        alert(res.data.message || "Login failed. Please try again.");
       }
     } catch (error) {
       if (error.response && error.response.status === 403) {

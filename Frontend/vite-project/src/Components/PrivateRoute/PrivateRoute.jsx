@@ -1,19 +1,14 @@
-import { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function PrivateRoute({ children }) {
-  const [auth, setAuth] = useState(null);
+  const { isAuthenticated, user, loading } = useContext(AuthContext);
 
-  useEffect(() => {
-    axios
-      .get("/checkAuth", { withCredentials: true })
-      .then((res) => setAuth(res.data.authenticated))
-      .catch(() => setAuth(false));
-  }, []);
-
-  if (auth === null) return <p>Loading...</p>;
-  if (auth === false) return <Navigate to="/login" replace />;
+  if (loading) return <p>Loading...</p>;
+  if (!isAuthenticated || user?.role === "admin") {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 }

@@ -15,4 +15,19 @@ const api = axios.create({
     withCredentials: true
 });
 
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("authToken");
+    if (token && token !== "undefined") {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// Warm up the Vercel serverless backend on app load
+// so the first real API call doesn't hit a cold start delay
+if (typeof window !== "undefined") {
+    api.get("/health").catch(() => {});
+}
+
 export default api;

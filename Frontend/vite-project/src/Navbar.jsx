@@ -65,11 +65,13 @@ const Navbar = () => {
       });
       logout();
       navigate("/");
+      localStorage.removeItem("authToken");
     } catch (error) {
       console.log(error);
       // Still logout locally even if backend fails
       logout();
       navigate("/");
+      localStorage.removeItem("authToken");
     }
   };
 

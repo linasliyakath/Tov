@@ -3,8 +3,10 @@ const Cart = require('../models/cartModel');
 const User = require('../models/userModel');
 const Product = require('../models/productModel');
 
+const { getUserIdFromAuth } = require('../utils/authToken');
+
 const getUserId = (req) => {
-    return req.session && req.session.user && req.session.user.id;
+    return getUserIdFromAuth(req.auth) || getUserIdFromAuth(req.session?.user);
 };
 
 // Create order and reduce stock

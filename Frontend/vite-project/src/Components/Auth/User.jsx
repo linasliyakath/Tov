@@ -17,12 +17,26 @@ const User = () => {
       <section>
         {/* Desktop image wrapped in Link */}
         <Link to={`/product/${products[0].id}`} className='cursor-pointer hidden md:block'>
-          <img src={products[0].desktopImage} alt={products[0].alt} className="w-full" />
+          <img
+            src={products[0].desktopImage}
+            alt={products[0].alt}
+            className="w-full"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
         </Link>
 
         {/* Mobile image wrapped in Link */}
         <Link to={`/product/${products[0].id}`} className='cursor-pointer md:hidden'>
-          <img src={products[0].mobileImage} alt={products[0].alt} className="w-full" />
+          <img
+            src={products[0].mobileImage}
+            alt={products[0].alt}
+            className="w-full"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
         </Link>
       </section>
       <ProductCard />

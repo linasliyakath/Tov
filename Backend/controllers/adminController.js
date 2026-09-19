@@ -4,6 +4,7 @@ const Product = require('../models/productModel')
 const Category = require('../models/categoryModel')
 const Order = require('../models/orderModel')
 const { uploadToCloudinary } = require('../config/cloudinary');
+const { createAuthToken } = require("../utils/authToken");
 
 
 exports.login = async (req, res) => {
@@ -24,26 +25,29 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
+    const adminId = admin._id.toString();
     req.session.admin = {
-      id: admin._id,
+      id: adminId,
       role: admin.role,
       email: admin.email,
       name : admin.name,
     };
 
+    const payload = {
+      message: "Admin Logged In",
+      admin: {
+        id: adminId,
+        email: admin.email,
+        name: admin.name,
+      },
+      token: createAuthToken({ id: adminId, name: admin.name, role: "admin", email: admin.email }),
+    };
+
     return req.session.save((sessionError) => {
       if (sessionError) {
         console.error("Admin session save error:", sessionError);
-        return res.status(500).json({ message: "Could not start admin session" });
       }
-      return res.status(200).json({
-        message: "Admin Logged In",
-        admin: {
-          id: admin._id,
-          email: admin.email,
-          name: admin.name,
-        },
-      });
+      return res.status(200).json(payload);
     });
 
   } catch (error) {

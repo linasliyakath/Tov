@@ -1,6 +1,5 @@
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const session = require("express-session");
 const { MongoStore } = require("connect-mongo");
@@ -21,13 +20,17 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  process.env.FRONTEND_URL
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /\.vercel\.app$/.test(origin)
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Origin is not allowed by CORS"));
@@ -39,29 +42,39 @@ app.use(
 );
 
 app.use(cookieParser());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(async (_req, res, next) => {
+// Connect DB first, then attach session middleware lazily
+app.use(async (req, res, next) => {
   try {
     await connectDB();
     next();
   } catch (error) {
     console.error("Database unavailable:", error);
-    res.status(503).json({ message: "Database is temporarily unavailable" });
+    return res
+      .status(503)
+      .json({ message: "Database is temporarily unavailable" });
   }
 });
 
-app.use(
-  session({
+// Session middleware — runs after DB is confirmed connected
+app.use((req, res, next) => {
+  const mongoUri = process.env.MONGO_URI;
+  const secret =
+    process.env.SESSION_SECRET ||
+    process.env.JWT_SECRET ||
+    "development-only-secret";
+
+  const sessionMiddleware = session({
     name: "tov.sid",
-    secret: process.env.SESSION_SECRET || "development-only-secret",
+    secret,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
+      mongoUrl: mongoUri,
       ttl: 24 * 60 * 60,
+      autoRemove: "native",
     }),
     cookie: {
       httpOnly: true,
@@ -69,8 +82,10 @@ app.use(
       sameSite: isProduction ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     },
-  })
-);
+  });
+
+  sessionMiddleware(req, res, next);
+});
 
 app.use("/uploads", express.static("uploads"));
 
@@ -87,6 +102,9 @@ app.get("/check-session", (req, res) => {
     return res.json({ loggedInAs: "user", user: req.session.user });
   res.json({ loggedInAs: "none" });
 });
+
+// Health check
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () =>

@@ -21,10 +21,10 @@ function AdminLogin() {
         { withCredentials: true }
       );
 
-      if (res.data.message === "Admin Logged In") {
-        localStorage.setItem("adminUser", JSON.stringify(res.data.admin));
-        // Update AuthContext state for admin
+      if (res.data.message === "Admin Logged In" && res.data.token) {
+        localStorage.setItem("authToken", res.data.token);
         login({
+          id: res.data.admin.id,
           name: res.data.admin.name || res.data.admin.email,
           role: "admin",
         });

@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
+const { createAuthToken, getRequestAuth } = require("../utils/authToken");
 
 // user register
 exports.register = async (req, res) => {
@@ -41,19 +42,23 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.json({ message: "Invalid credentials" });
 
-    req.session.user = { id: user.id, name: user.name, role: "user" };
+    const userId = user._id.toString();
+    const token = createAuthToken({ id: userId, name: user.name, role: "user" });
+    const payload = {
+      message: "User Logged In",
+      role: "user",
+      name: user.name,
+      id: userId,
+      token,
+    };
+
+    req.session.user = { id: userId, name: user.name, role: "user" };
     req.session.cart = [];
     return req.session.save((sessionError) => {
       if (sessionError) {
         console.error("Session save error:", sessionError);
-        return res.status(500).json({ message: "Could not start your session" });
       }
-      return res.json({
-        message: "User Logged In",
-        role: "user",
-        name: user.name,
-        id: user._id || user.id,
-      });
+      return res.json(payload);
     });
   } catch (error) {
     console.error("User Login Error:", error);
@@ -84,14 +89,16 @@ exports.logout = (req, res) => {
 
 
 exports.checkAuth = (req, res) => {
-  if (req.session.user) {
-    const { name, role } = req.session.user;
-    return res.json({ authenticated: true, name, role });
-  } else if (req.session.admin) {
-    const { name, role, email } = req.session.admin;
+  const user = getRequestAuth(req);
+  if (user?.role === "user") {
+    const { id, name, role } = user;
+    return res.json({ authenticated: true, id, name, role });
+  } else if (user?.role === "admin") {
+    const { id, name, role, email } = user;
     return res.json({
       authenticated: true,
-      name: req.session.admin.name || email, // fallback to email if no name
+      id,
+      name: name || email,
       role: "admin",
     });
   } else {

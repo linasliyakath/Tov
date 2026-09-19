@@ -106,6 +106,7 @@ function Head() {
         loop
         autoPlay
         muted
+        playsInline
         src="/assets/mobileView.webm"
       ></video>
       {/* Desktop Video */}
@@ -114,6 +115,7 @@ function Head() {
         loop
         autoPlay
         muted
+        playsInline
         src="/assets/LapView.webm"
       ></video>
     </Link>
